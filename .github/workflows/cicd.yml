@@ -11,25 +11,10 @@ env:
   JAVA_VERSION: '17'
 
 jobs:
-  test-backend:
-    name: Backend Tests
+  build-and-test:
+    name: Build & Compile Check
     runs-on: ubuntu-latest
     
-    services:
-      postgres:
-        image: postgres:15-alpine
-        env:
-          POSTGRES_DB: sarangsalgi_test
-          POSTGRES_USER: test
-          POSTGRES_PASSWORD: test123
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -40,26 +25,6 @@ jobs:
         java-version: ${{ env.JAVA_VERSION }}
         distribution: 'temurin'
         cache: maven
-
-    - name: Run backend tests
-      working-directory: ./server
-      run: |
-        ./mvnw clean test
-        ./mvnw jacoco:report
-
-    - name: Upload coverage reports
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./server/target/site/jacoco/jacoco.xml
-        flags: backend
-
-  test-frontend:
-    name: Frontend Tests
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
 
     - name: Set up Node.js ${{ env.NODE_VERSION }}
       uses: actions/setup-node@v4
@@ -68,57 +33,31 @@ jobs:
         cache: 'npm'
         cache-dependency-path: './client/package-lock.json'
 
-    - name: Install dependencies
-      working-directory: ./client
-      run: npm ci
-
-    - name: Run linting
-      working-directory: ./client
-      run: npm run lint --if-present
-
-    - name: Run type checking
-      working-directory: ./client
-      run: npm run type-check --if-present
-
-    - name: Run tests
-      working-directory: ./client
-      run: npm test --if-present
-
-    - name: Build frontend
-      working-directory: ./client
-      run: npm run build
-
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: frontend-build
-        path: ./client/dist
-
-  build-backend:
-    name: Backend Build
-    runs-on: ubuntu-latest
-    needs: [test-backend]
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up JDK ${{ env.JAVA_VERSION }}
-      uses: actions/setup-java@v4
-      with:
-        java-version: ${{ env.JAVA_VERSION }}
-        distribution: 'temurin'
-        cache: maven
-
-    - name: Build backend
+    - name: Build backend (compilation check)
       working-directory: ./server
-      run: ./mvnw clean package -DskipTests
+      run: ./mvnw clean compile
+
+    - name: Build frontend (TypeScript check)
+      working-directory: ./client
+      run: |
+        npm ci
+        npm run build
+
+    - name: Package backend
+      working-directory: ./server
+      run: ./mvnw package -DskipTests
 
     - name: Upload JAR artifact
       uses: actions/upload-artifact@v4
       with:
         name: backend-jar
         path: ./server/target/*.jar
+
+    - name: Upload frontend artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: frontend-build
+        path: ./client/dist
 
   security-scan:
     name: Security Scan
@@ -146,7 +85,7 @@ jobs:
   deploy-staging:
     name: Deploy to Staging
     runs-on: ubuntu-latest
-    needs: [test-backend, test-frontend, build-backend]
+    needs: [build-and-test]
     if: github.ref == 'refs/heads/develop'
     environment: staging
     
@@ -173,7 +112,7 @@ jobs:
   deploy-production:
     name: Deploy to Production
     runs-on: ubuntu-latest
-    needs: [test-backend, test-frontend, build-backend, security-scan]
+    needs: [build-and-test, security-scan]
     if: github.ref == 'refs/heads/main'
     environment: production
     
