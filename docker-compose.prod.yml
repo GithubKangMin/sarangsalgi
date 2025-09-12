@@ -5,6 +5,7 @@ services:
     build: .
     ports:
       - "80:80"
+      - "443:443"
       - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
@@ -12,12 +13,17 @@ services:
       - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
       - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+    volumes:
+      - app_logs:/app/logs
+      - upload_files:/app/uploads
+      - ssl_certs:/etc/ssl/certs:ro
+      - ssl_private:/etc/ssl/private:ro
     depends_on:
       postgres:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -49,3 +55,7 @@ services:
 
 volumes:
   postgres_data:
+  app_logs:
+  upload_files:
+  ssl_certs:
+  ssl_private:

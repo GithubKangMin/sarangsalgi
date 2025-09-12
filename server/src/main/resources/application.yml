@@ -28,6 +28,36 @@ sarangsalgi:
   admin:
     password: ${ADMIN_PASSWORD:admin123}
 
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,loggers
+  endpoint:
+    health:
+      show-details: when-authorized
+    metrics:
+      enabled: true
+  metrics:
+    export:
+      simple:
+        enabled: true
+
+# Logging Configuration
+logging:
+  level:
+    com.sarangsalgi: INFO
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: /app/logs/sarangsalgi.log
+    max-size: 100MB
+    max-history: 30
+
 ---
 # Development Profile (H2)
 spring:
@@ -54,9 +84,9 @@ spring:
       on-profile: prod
   
   datasource:
-    url: jdbc:postgresql://localhost:5432/sarangsalgi
-    username: sarangsalgi
-    password: sarangsalgi123
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/sarangsalgi}
+    username: ${SPRING_DATASOURCE_USERNAME:sarangsalgi}
+    password: ${SPRING_DATASOURCE_PASSWORD:sarangsalgi123}
     driver-class-name: org.postgresql.Driver
   
   jpa:
