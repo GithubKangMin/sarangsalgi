@@ -34,9 +34,7 @@ COPY --from=frontend-build /app/client/dist /var/www/html
 # Copy nginx configuration
 COPY docker/nginx.conf /etc/nginx/sites-available/default
 
-# Environment variables
-ENV SPRING_PROFILES_ACTIVE=prod
-ENV ADMIN_PASSWORD=admin123
+# Environment variables will be set via docker-compose or runtime
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \

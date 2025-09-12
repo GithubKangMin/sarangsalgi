@@ -7,11 +7,11 @@ services:
       - "80:80"
       - "8080:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=prod
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/sarangsalgi
-      - SPRING_DATASOURCE_USERNAME=sarangsalgi
-      - SPRING_DATASOURCE_PASSWORD=sarangsalgi123
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
+      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
     depends_on:
       postgres:
         condition: service_healthy
@@ -25,9 +25,9 @@ services:
   postgres:
     image: postgres:15-alpine
     environment:
-      POSTGRES_DB: sarangsalgi
-      POSTGRES_USER: sarangsalgi
-      POSTGRES_PASSWORD: sarangsalgi123
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
