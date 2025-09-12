@@ -22,8 +22,8 @@ RUN ./mvnw clean package -DskipTests
 # Production image
 FROM openjdk:17-jre-slim
 
-# Install nginx for serving frontend
-RUN apt-get update && apt-get install -y nginx && rm -rf /var/lib/apt/lists/*
+# Install nginx and curl for serving frontend and health checks
+RUN apt-get update && apt-get install -y nginx curl && rm -rf /var/lib/apt/lists/*
 
 # Copy backend JAR
 COPY --from=backend-build /app/server/target/*.jar /app/sarangsalgi.jar
@@ -31,8 +31,9 @@ COPY --from=backend-build /app/server/target/*.jar /app/sarangsalgi.jar
 # Copy frontend build
 COPY --from=frontend-build /app/client/dist /var/www/html
 
-# Copy nginx configuration
+# Copy nginx configurations
 COPY docker/nginx.conf /etc/nginx/sites-available/default
+COPY docker/nginx-http-only.conf /docker/nginx-http-only.conf
 
 # Environment variables will be set via docker-compose or runtime
 
@@ -41,7 +42,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
   CMD curl -f http://localhost:8080/actuator/health || exit 1
 
 # Expose ports
-EXPOSE 80 8080
+EXPOSE 80 443 8080
 
 # Start script
 COPY docker/start.sh /start.sh

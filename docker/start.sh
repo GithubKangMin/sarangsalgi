@@ -1,10 +1,40 @@
 #!/bin/bash
+set -e
+
+# Create log directory
+mkdir -p /app/logs
+
+# Choose nginx config based on SSL certificate existence
+if [ -f "/etc/ssl/certs/cert.pem" ] && [ -f "/etc/ssl/private/key.pem" ]; then
+    echo "SSL certificates found, using HTTPS configuration"
+    cp /etc/nginx/sites-available/default /etc/nginx/sites-enabled/
+else
+    echo "SSL certificates not found, using HTTP-only configuration"
+    cp /docker/nginx-http-only.conf /etc/nginx/sites-enabled/default
+fi
+
+# Test nginx configuration
+nginx -t
 
 # Start nginx in background
 nginx -g "daemon off;" &
+NGINX_PID=$!
 
 # Wait for nginx to start
-sleep 2
+sleep 3
+
+# Function to handle shutdown
+cleanup() {
+    echo "Shutting down..."
+    kill $NGINX_PID 2>/dev/null || true
+    exit 0
+}
+trap cleanup SIGTERM SIGINT
 
 # Start Spring Boot application
-exec java -jar /app/sarangsalgi.jar
+echo "Starting Spring Boot application..."
+java -jar /app/sarangsalgi.jar &
+SPRING_PID=$!
+
+# Wait for either process to exit
+wait $SPRING_PID
