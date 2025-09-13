@@ -38,7 +38,7 @@ echo "  - 시간: $(date)"
 
 # 프로덕션 환경으로 빌드 및 배포
 echo -e "${YELLOW}🔨 Docker 이미지 빌드 중...${NC}"
-docker-compose -f docker-compose.prod.yml build --no-cache
+docker build --no-cache -t sarangsalgi-app:latest .
 
 echo -e "${YELLOW}🚀 서비스 시작 중...${NC}"
 docker-compose -f docker-compose.prod.yml up -d
