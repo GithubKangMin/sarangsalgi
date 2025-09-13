@@ -3,7 +3,7 @@ spring:
     name: sarangsalgi
   
   profiles:
-    active: prod
+    active: dev
   
   jpa:
     hibernate:
@@ -88,6 +88,16 @@ spring:
     username: ${SPRING_DATASOURCE_USERNAME:sarangsalgi}
     password: ${SPRING_DATASOURCE_PASSWORD:sarangsalgi123}
     driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+---
+# Docker Profile (PostgreSQL)
+spring:
+  config:
+    activate:
+      on-profile: docker
   
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect

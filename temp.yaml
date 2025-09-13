@@ -1,5 +1,20 @@
 services:
-  app:
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+    image: sarangsalgi-frontend:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:8080
+    command: npm run dev
+    restart: unless-stopped
+
+  backend:
     # Apple Silicon(M1/M2)에서 amd64 이미지가 필요하면 주석 해제
     # platform: linux/amd64
 
@@ -24,8 +39,8 @@ services:
       - app_logs:/app/logs
       - upload_files:/app/uploads
       # 실제 인증서 경로가 로컬에 존재해야 합니다.
-#      - /etc/letsencrypt/live/yourdomain.com/fullchain.pem:/etc/ssl/certs/cert.pem:ro
-#      - /etc/letsencrypt/live/yourdomain.com/privkey.pem:/etc/ssl/private/key.pem:ro
+      - /etc/letsencrypt/live/yourdomain.com/fullchain.pem:/etc/ssl/certs/cert.pem:ro
+      - /etc/letsencrypt/live/yourdomain.com/privkey.pem:/etc/ssl/private/key.pem:ro
 
     depends_on:
       postgres:

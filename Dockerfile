@@ -13,7 +13,7 @@ COPY client/ ./
 RUN npm run build
 
 # Backend build stage
-FROM eclipse-temurin:17-jdk-alpine AS backend-build
+FROM --platform=linux/amd64 eclipse-temurin:17-jdk-alpine AS backend-build
 
 WORKDIR /app/server
 COPY server/mvnw server/pom.xml ./
@@ -24,7 +24,7 @@ COPY server/src ./src
 RUN ./mvnw clean package -DskipTests
 
 # Production image
-FROM eclipse-temurin:17-jre-alpine
+FROM --platform=linux/amd64 eclipse-temurin:17-jre-alpine
 
 # Install nginx and curl for serving frontend and health checks
 RUN apk update && apk add --no-cache nginx curl && mkdir -p /etc/nginx/sites-enabled
@@ -36,8 +36,8 @@ COPY --from=backend-build /app/server/target/*.jar /app/sarangsalgi.jar
 COPY --from=frontend-build /app/client/dist /var/www/html
 
 # Copy nginx configurations
-COPY docker/nginx.conf /etc/nginx/sites-available/default
-COPY docker/nginx-http-only.conf /docker/nginx-http-only.conf
+COPY docker/nginx.conf /etc/nginx/http.d/default.conf
+COPY docker/nginx-http-only.conf /etc/nginx/nginx-http-only.conf
 
 # Environment variables will be set via docker-compose or runtime
 

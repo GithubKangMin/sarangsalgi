@@ -7,10 +7,10 @@ mkdir -p /app/logs
 # Choose nginx config based on SSL certificate existence
 if [ -f "/etc/ssl/certs/cert.pem" ] && [ -f "/etc/ssl/private/key.pem" ]; then
     echo "SSL certificates found, using HTTPS configuration"
-    cp /etc/nginx/sites-available/default /etc/nginx/sites-enabled/
+    # HTTPS config is already copied to /etc/nginx/http.d/default.conf
 else
     echo "SSL certificates not found, using HTTP-only configuration"
-    cp /docker/nginx-http-only.conf /etc/nginx/sites-enabled/default
+    cp /etc/nginx/nginx-http-only.conf /etc/nginx/http.d/default.conf
 fi
 
 # Test nginx configuration
