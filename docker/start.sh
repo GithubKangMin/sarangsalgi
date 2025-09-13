@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 set -e
 
 # Create log directory
@@ -29,7 +29,7 @@ cleanup() {
     kill $NGINX_PID 2>/dev/null || true
     exit 0
 }
-trap cleanup SIGTERM SIGINT
+trap cleanup TERM INT
 
 # Start Spring Boot application
 echo "Starting Spring Boot application..."

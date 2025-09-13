@@ -3,7 +3,11 @@ FROM node:18-alpine AS frontend-build
 
 WORKDIR /app/client
 COPY client/package*.json ./
-RUN npm ci
+
+# Clear npm cache and reinstall with platform-specific dependencies
+RUN npm cache clean --force && \
+    rm -rf node_modules package-lock.json && \
+    npm install
 
 COPY client/ ./
 RUN npm run build
