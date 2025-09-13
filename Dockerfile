@@ -27,7 +27,7 @@ RUN ./mvnw clean package -DskipTests
 FROM eclipse-temurin:17-jre-alpine
 
 # Install nginx and curl for serving frontend and health checks
-RUN apk update && apk add --no-cache nginx curl
+RUN apk update && apk add --no-cache nginx curl && mkdir -p /etc/nginx/sites-enabled
 
 # Copy backend JAR
 COPY --from=backend-build /app/server/target/*.jar /app/sarangsalgi.jar
