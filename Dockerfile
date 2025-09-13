@@ -9,7 +9,7 @@ COPY client/ ./
 RUN npm run build
 
 # Backend build stage
-FROM openjdk:17-jdk-slim AS backend-build
+FROM eclipse-temurin:17-jdk-alpine AS backend-build
 
 WORKDIR /app/server
 COPY server/mvnw server/pom.xml ./
@@ -20,10 +20,10 @@ COPY server/src ./src
 RUN ./mvnw clean package -DskipTests
 
 # Production image
-FROM openjdk:17-jre-slim
+FROM eclipse-temurin:17-jre-alpine
 
 # Install nginx and curl for serving frontend and health checks
-RUN apt-get update && apt-get install -y nginx curl && rm -rf /var/lib/apt/lists/*
+RUN apk update && apk add --no-cache nginx curl
 
 # Copy backend JAR
 COPY --from=backend-build /app/server/target/*.jar /app/sarangsalgi.jar
