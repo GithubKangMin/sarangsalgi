@@ -3,6 +3,34 @@
 -- 확장 설치 (UUID 지원)
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- 테이블 생성 (IF NOT EXISTS 사용)
+CREATE TABLE IF NOT EXISTS topics (
+    id UUID PRIMARY KEY,
+    title VARCHAR(100) NOT NULL,
+    content VARCHAR(2000) NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS concerns (
+    id BIGSERIAL PRIMARY KEY,
+    category VARCHAR(255) NOT NULL,
+    content VARCHAR(2000) NOT NULL,
+    student_id VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    is_resolved BOOLEAN DEFAULT FALSE
+);
+
+CREATE TABLE IF NOT EXISTS answers (
+    id BIGSERIAL PRIMARY KEY,
+    topic_id UUID,
+    content VARCHAR(2000) NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    FOREIGN KEY (topic_id) REFERENCES topics(id)
+);
+
+
 -- 샘플 토픽 데이터
 INSERT INTO topics (id, title, content, created_at, updated_at) VALUES 
 (uuid_generate_v4(), '대학생활 팁 공유', '대학생활을 하면서 유용했던 팁들을 자유롭게 공유해보세요! 공부법, 생활 노하우, 인간관계 등 무엇이든 좋습니다.', NOW(), NOW()),
